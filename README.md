@@ -1,4 +1,4 @@
-# eatcoffee(wip)
+# eatcoffee
 ### Goals (2d):
 - [ ] Setup
 - [ ] Triangle
@@ -9,9 +9,12 @@
 - [ ] Move multiple shapes
 - [ ] ?
 ### Goals (3d):
-TODO...
+- [ ] ?
 
 ### Resources:
-- what?: https://github.com/gfx-rs/wgpu
+- what?: 
+  - https://wgpu.rs/
+  - https://github.com/gfx-rs/wgpu
 
-- help: https://github.com/sotrh/learn-wgpu/tree/master/code/showcase/framework
+- help: 
+  - https://github.com/sotrh/learn-wgpu/tree/master/code/showcase/framework
