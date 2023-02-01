@@ -1,4 +1,4 @@
-use anyhow;
+use anyhow::*;
 use std::ops::Range;
 use std::path::Path;
 use wgpu::util::DeviceExt;
@@ -23,7 +23,7 @@ impl Vertex for ModelVertex {
     fn desc<'a>() -> wgpu::VertexBufferLayout<'a> {
         use std::mem;
         wgpu::VertexBufferLayout {
-            array_stride: mem::size_of::<ModelVertex>() as wgpu::BufferAddres,
+            array_stride: mem::size_of::<ModelVertex>() as wgpu::BufferAddress,
             step_mode: wgpu::VertexStepMode::Vertex,
             attributes: &[
                 wgpu::VertexAttribute {
@@ -123,7 +123,7 @@ impl<'a> Model<'a> {
         layout: &wgpu::BindGroupLayout,
         path: P,
     ) -> Result<Self> {
-        let (obj_models, obj_materals) = tobj::load_obj(path.as_ref(), true)?;
+        let (obj_models, obj_materials) = tobj::load_obj(path.as_ref(), true)?;
 
         let containing_folder = path.as_ref().parent().context("Directory has no parent")?;
 
@@ -143,7 +143,7 @@ impl<'a> Model<'a> {
                 queue,
                 containing_folder.join(normal_path),
                 true
-            );
+            )?;
 
             materials.push(Material::new(
                     device,
@@ -157,30 +157,30 @@ impl<'a> Model<'a> {
         let mut meshes = Vec::new();
         for m in obj_models {
             let mut vertices = Vec::new();
-            for i in 0..m.mesh.position.len() / 3 {
+            for i in 0..m.mesh.positions.len() / 3 {
                 vertices.push(ModelVertex {
                     position: [
-                        m.mesh.position[i * 3],
-                        m.mesh.position[i * 3 + 1],
-                        m.mesh.position[i * 3 + 2],
-                    ].into(),
+                        m.mesh.positions[i * 3],
+                        m.mesh.positions[i * 3 + 1],
+                        m.mesh.positions[i * 3 + 2],
+                    ],
                     tex_coords: [
                         m.mesh.texcoords[i * 2],
                         m.mesh.texcoords[i * 2 + 1],
-                    ].into(),
+                    ],
                     normal: [
                         m.mesh.normals[i * 3],
                         m.mesh.normals[i * 3 + 1],
                         m.mesh.normals[i * 3 + 2],
-                    ].into(),
-                    tangent: [0.0; 3].into(),
-                    bitangent: [0.0; 3].into(),
+                    ],
+                    tangent: [0.0; 3],
+                    bitangent: [0.0; 3],
                 });
             }
             let indices = &m.mesh.indices;
 
             // Tangents and bitangents calculation
-            for c in indices.chuncks(3) {
+            for c in indices.chunks(3) {
                 let v0 = vertices[c[0] as usize];
                 let v1 = vertices[c[1] as usize];
                 let v2 = vertices[c[0] as usize];
@@ -189,13 +189,13 @@ impl<'a> Model<'a> {
                 let pos1: cgmath::Vector3<_> = v1.position.into();
                 let pos2: cgmath::Vector3<_> = v2.position.into();
 
-                let uv0: cgmath::Vector<_> = v0.tex_coord.into();
-                let uv1: cgmath::Vector<_> = v1.tex_coord.into();
-                let uv2: cgmath::Vector<_> = v2.tex_coord.into();
+                let uv0: cgmath::Vector2<_> = v0.tex_coords.into();
+                let uv1: cgmath::Vector2<_> = v1.tex_coords.into();
+                let uv2: cgmath::Vector2<_> = v2.tex_coords.into();
 
                 // Edges of the triangle
                 let delta_pos1 = pos1 - pos0;
-                let delta_pos2 = pos2 - pso0;
+                let delta_pos2 = pos2 - pos0;
 
                 // Direction to calculate the tangent and bitangent
                 let delta_uv1 = uv1  - uv0;
@@ -254,7 +254,7 @@ pub trait DrawModel<'a> {
         mesh: &'a Mesh,
         materal: &'a Material,
         instances: Range<u32>,
-        camera_bind_group: &'a wpgu::BindGroup,
+        camera_bind_group: &'a wgpu::BindGroup,
         light_bind_group: &'a wgpu::BindGroup,
     );
 
@@ -270,7 +270,7 @@ pub trait DrawModel<'a> {
         model: &'a Model,
         instances: Range<u32>,
         camera_bind_group: &'a wgpu::BindGroup,
-        light_bind_group: &'a wgpu::BindGrooup,
+        light_bind_group: &'a wgpu::BindGroup,
     );
 
     fn draw_model_instanced_with_material(
@@ -279,7 +279,7 @@ pub trait DrawModel<'a> {
         material: &'a Material,
         instances: Range<u32>,
         camera_bind_group: &'a wgpu::BindGroup,
-        light_bind_group: &'a wpgu::BindGroup,
+        light_bind_group: &'a wgpu::BindGroup,
     );
 }
 
@@ -314,12 +314,12 @@ where
         self.set_vertex_buffer(0, mesh.vertex_buffer.slice(..));
         self.set_index_buffer(mesh.index_buffer.slice(..), wgpu::IndexFormat::Uint32);
         self.set_bind_group(0, &material.bind_group, &[]);
-        self.set_bind_group(0, &camera_bind_group, &[]);
-        self.set_bind_group(0, &light_bind_group, &[]);
+        self.set_bind_group(1, camera_bind_group, &[]);
+        self.set_bind_group(2, light_bind_group, &[]);
         self.draw_indexed(0..mesh.num_elements, 0, instances);
     }
 
-    fn drae_model(
+    fn draw_model(
         &mut self,
         model: &'b Model,
         camera_bind_group: &'b wgpu::BindGroup,
@@ -362,7 +362,7 @@ where
             self.draw_mesh_instanced(
                 mesh,
                 material,
-                instance.clone(),
+                instances.clone(),
                 camera_bind_group,
                 light_bind_group
             );
@@ -377,7 +377,7 @@ pub trait DrawLight<'a> {
         camera_bind_group: &'a wgpu::BindGroup,
         light_bind_group: &'a wgpu::BindGroup,
     );
-    fn draw_light_instanced(
+    fn draw_light_mesh_instanced(
         &mut self,
         mesh: &'a Mesh,
         instances: Range<u32>,
@@ -386,15 +386,78 @@ pub trait DrawLight<'a> {
     );
     fn draw_light_model(
         &mut self,
-        mesh: &'a Mesh,
+        mesh: &'a Model,
         camera_bind_group: &'a wgpu::BindGroup,
         light_bind_group: &'a wgpu::BindGroup,
     );
     fn draw_light_model_instanced(
         &mut self,
-        model: &'a Mesh,
+        model: &'a Model,
         instances: Range<u32>,
         camera_bind_group: &'a wgpu::BindGroup,
         light_bind_group: &'a wgpu::BindGroup,
     );
+}
+
+impl<'a, 'b> DrawLight<'b> for wgpu::RenderPass<'a>
+where
+    'b: 'a,
+{
+    fn draw_light_mesh(
+        &mut self,
+        mesh: &'b Mesh,
+        camera_bind_group: &'b wgpu::BindGroup,
+        light_bind_group: &'b wgpu::BindGroup,
+    ) {
+        self.draw_light_mesh_instanced(
+            mesh,
+            0..1,
+            camera_bind_group,
+            light_bind_group
+        );
+    }
+    fn draw_light_mesh_instanced(
+        &mut self,
+        mesh: &'b Mesh,
+        instances: Range<u32>,
+        camera_bind_group: &'b wgpu::BindGroup,
+        light_bind_group: &'b wgpu::BindGroup
+    ) {
+        self.set_vertex_buffer(0, mesh.vertex_buffer.slice(..));
+        self.set_index_buffer(mesh.index_buffer.slice(..), wgpu::IndexFormat::Uint32);
+        self.set_bind_group(0, camera_bind_group, &[]);
+        self.set_bind_group(1, light_bind_group, &[]);
+        self.draw_indexed(0..mesh.num_elements, 0, instances);
+    }
+
+    fn draw_light_model(
+        &mut self,
+        model: &'b Model,
+        camera_bind_group: &'b wgpu::BindGroup,
+        light_bind_group: &'b wgpu::BindGroup,
+    ) {
+        self.draw_light_model_instanced(
+            model,
+            0..1, 
+            camera_bind_group,
+            light_bind_group,
+        );
+    }
+
+    fn draw_light_model_instanced(
+        &mut self,
+        model: &'b Model,
+        instance: Range<u32>,
+        camera_bind_group: &'b wgpu::BindGroup,
+        light_bind_group: &'b wgpu::BindGroup,
+    ) { 
+        for mesh in &model.meshes {
+            self.draw_light_mesh_instanced(
+                mesh,
+                instance.clone(),
+                camera_bind_group,
+                light_bind_group
+            );
+        }
+    }
 }
