@@ -1,5 +1,5 @@
 # eatcoffee
-### Goals (2d):
+### Targets (2d):
 - [ ] Setup
 - [ ] Triangle
 - [ ] Quad
@@ -8,13 +8,14 @@
 - [ ] Multiple shapes
 - [ ] Move multiple shapes
 - [ ] ?
-### Goals (3d):
+### Targets (3d):
 - [ ] ?
 
 ### Resources:
-- what?: 
+- **what?**: 
   - https://wgpu.rs/
   - https://github.com/gfx-rs/wgpu
 
-- help: 
+- **help**: 
   - https://github.com/sotrh/learn-wgpu/tree/master/code/showcase/framework
+  - https://sotrh.github.io/learn-wgpu/
