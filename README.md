@@ -1,4 +1,6 @@
-# EatCoffee(consume a lot)
+# EatCoffee
+(working title) like consuming a lot.
+
 Wrapping some abstraction over [wgpu](https://wgpu.rs/). 
 
 ### Targets (2d):
