@@ -1,6 +1,5 @@
-# EatCoffee
-(working title) like consuming a lot.
-
+# Canvas(working title)
+(WIP)
 Wrapping some abstraction over [wgpu](https://wgpu.rs/). 
 
 ### Targets (2d):

@@ -1,10 +1,8 @@
-use anyhow::*;
 use std::num::NonZeroU32;
 
 pub struct RenderPipelineBuilder<'a> {
     layout: Option<&'a wgpu::PipelineLayout>,
-    vertex_shader: Option<wgpu::ShaderModuleDescriptor<'a>>,
-    fragment_shader: Option<wgpu::ShaderModuleDescriptor<'a>>,
+    shader_source: Option<wgpu::ShaderSource<'a>>,
     front_face: wgpu::FrontFace,
     cull_mode: Option<wgpu::Face>,
     depth_bias: i32,
@@ -21,14 +19,19 @@ pub struct RenderPipelineBuilder<'a> {
     multiview: Option<NonZeroU32>,
 }
 
+impl<'a> Default for RenderPipelineBuilder<'a> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<'a> RenderPipelineBuilder<'a> {
     pub fn new() -> Self {
         Self {
             layout: None,
-            vertex_shader: None,
-            fragment_shader: None,
+            shader_source: None,
             front_face: wgpu::FrontFace::Ccw,
-            cull_mode: None,
+            cull_mode: Some(wgpu::Face::Back),
             depth_bias: 0,
             depth_bias_slope_scale: 0.0,
             depth_bias_clamp: 0.0,
@@ -49,15 +52,11 @@ impl<'a> RenderPipelineBuilder<'a> {
         self
     }
 
-    pub fn vertex_shader(&mut self, src: wgpu::ShaderModuleDescriptor<'a>) -> &mut Self {
-        self.vertex_shader = Some(src);
+    pub fn shader_source(&mut self, src: wgpu::ShaderSource<'a>) -> &mut Self {
+        self.shader_source = Some(src);
         self
     }
 
-    pub fn fragment_shader(&mut self, src: wgpu::ShaderModuleDescriptor<'a>) -> &mut Self {
-        self.fragment_shader = Some(src);
-        self
-    }
 
     pub fn front_face(&mut self, ff: wgpu::FrontFace) -> &mut Self {
         self.front_face = ff;
@@ -161,39 +160,32 @@ impl<'a> RenderPipelineBuilder<'a> {
         self
     }
 
-    pub fn build(&mut self, device: &wgpu::Device) -> Result<wgpu::RenderPipeline> {
+    pub fn build(&mut self, device: &wgpu::Device) -> wgpu::RenderPipeline {
         if self.layout.is_none() {
-            bail!("No pipeline layout supplied!")
+            panic!("No pipeline layout supplied!")
         }
         let layout = self.layout.unwrap();
 
-        if self.vertex_shader.is_none() {
-            bail!("No vertex shader suplied!")
+        if self.shader_source.is_none() {
+            panic!("No shader source file suplied!")
         }
 
-        let vs = device.create_shader_module(
-            self.vertex_shader
-            .take()
-            .context("Please include a vertex shader")?,
-        );
+        let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
+            label: Some("Shader"),
+            source: self.shader_source.take().unwrap(),
+        });
 
-        let fs = self.fragment_shader
-            .take()
-            .context("Please include a fragment shader")?;
-
-        let fs = device.create_shader_module(fs);
-
-        let pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+        device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
             label: Some("Render Pipelne"),
             layout: Some(layout),
             vertex: wgpu::VertexState {
-                module: &vs,
-                entry_point: "main",
+                module: &shader,
+                entry_point: "vs_main",
                 buffers: &self.vertex_buffers,
             },
             fragment: Some(wgpu::FragmentState {
-                module: &fs,
-                entry_point: "main",
+                module: &shader,
+                entry_point: "fs_main",
                 targets: &self.color_states,
             }),
             primitive: wgpu::PrimitiveState {
@@ -202,7 +194,8 @@ impl<'a> RenderPipelineBuilder<'a> {
                 cull_mode: self.cull_mode,
                 strip_index_format: None,
                 polygon_mode: wgpu::PolygonMode::Fill,
-                ..Default::default()
+                unclipped_depth: false,
+                conservative: false,
             },
             depth_stencil: self.depth_stencil.clone(),
             multisample: wgpu::MultisampleState {
@@ -211,8 +204,6 @@ impl<'a> RenderPipelineBuilder<'a> {
                 alpha_to_coverage_enabled: self.alpha_to_coverage_enabled,
             },
             multiview: self.multiview,
-        });
-
-        Ok(pipeline)
+        })
     }
 }
