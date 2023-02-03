@@ -1,8 +1,6 @@
 use anyhow::*;
 use std::num::NonZeroU32;
 
-use crate::model::Vertex;
-
 pub struct RenderPipelineBuilder<'a> {
     layout: Option<&'a wgpu::PipelineLayout>,
     vertex_shader: Option<wgpu::ShaderModuleDescriptor<'a>>,
@@ -136,10 +134,7 @@ impl<'a> RenderPipelineBuilder<'a> {
         self
     }
 
-    pub fn vertex_buffer<V: Vertex>(&mut self) -> &mut Self {
-        self.vertex_buffers.push(V::desc());
-        self
-    }
+    pub fn vertex_buffer(&mut self) {}
 
     pub fn vertex_buffer_desc(&mut self, vb: wgpu::VertexBufferLayout<'a>) -> &mut Self {
         self.vertex_buffers.push(vb);
@@ -182,11 +177,11 @@ impl<'a> RenderPipelineBuilder<'a> {
             .context("Please include a vertex shader")?,
         );
 
-        let fs_spv = self.fragment_shader
+        let fs = self.fragment_shader
             .take()
             .context("Please include a fragment shader")?;
 
-        let fs = device.create_shader_module(fs_spv);
+        let fs = device.create_shader_module(fs);
 
         let pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
             label: Some("Render Pipelne"),
