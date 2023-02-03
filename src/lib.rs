@@ -1,2 +1,2 @@
 pub mod pipeline;
-pub mod display;
+pub mod canvas;
