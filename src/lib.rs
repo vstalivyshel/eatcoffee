@@ -1,2 +1,1 @@
-pub mod pipeline;
-pub mod canvas;
+pub mod setup;

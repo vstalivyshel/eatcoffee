@@ -1,15 +1,15 @@
-# Canvas(working title)
-(WIP)
+# EatCoffee(working title)
+(WIP)  
+
 Wrapping some abstraction over [wgpu](https://wgpu.rs/). 
 
 ### Targets (2d):
-- [ ] Setup basics.
-- [ ] Triangle.
-- [ ] Quad.
+- [ ] Basic setup.
+- [ ] Hello World (Triangle).
+- [ ] Textures.
+- [ ] Complex shape.
 - [ ] Move shape around.
-- [ ] Move shape around using keyboard.
-- [ ] Multiple shapes.
-- [ ] Move multiple shapes.
+- [ ] Multiple instances.
 - [ ] ?
 ### Targets (3d):
 - [ ] ?

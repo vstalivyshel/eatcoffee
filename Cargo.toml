@@ -4,8 +4,15 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+bytemuck = { version = "1.13.0",  features = [ "derive" ] }
+thiserror = "1.0.38"
+anyhow = "1.0.68"
 winit = "0.28.1"
 env_logger = "0.10"
 log = "0.4"
 wgpu = "0.15"
 pollster = "0.2.5"
+
+[dependencies.image]
+version = "0.24.5"
+features = ["png", "jpeg"]
