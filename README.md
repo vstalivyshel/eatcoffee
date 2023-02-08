@@ -1,15 +1,21 @@
 # EatCoffee(working title)
-(WIP)  
+(Very Much WIP)  
 
-Wrapping some abstraction over [wgpu](https://wgpu.rs/). 
+Wrapping some abstraction over [wgpu](https://wgpu.rs/).   
+The main goal is to simplify creating objects and rendering process.  
+The second goal is to set up a playground for little 2d game dev. Nothing special  
+just to make learning rust and cg more fun. (further maybe more)  
+  
+For now, it is just a copy of wgpu framework.
 
 ### Targets (2d):
-- [ ] Basic setup.
+- [ ] Setup.
 - [ ] Hello World (Triangle).
 - [ ] Textures.
 - [ ] Complex shape.
 - [ ] Move shape around.
 - [ ] Multiple instances.
+- [ ] Render text (using different fonts).
 - [ ] ?
 ### Targets (3d):
 - [ ] ?

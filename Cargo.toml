@@ -1,7 +1,16 @@
 [package]
-name = "eatcoffee"
+name = "canvas"
 version = "0.1.0"
 edition = "2021"
+include = ["examples/"]
+
+[[bin]]
+name = "stencil_triangles"
+path = "src/examples/stencil_triangles/main.rs"
+
+[[bin]]
+name = "cube"
+path = "src/examples/cube/main.rs"
 
 [dependencies]
 bytemuck = { version = "1.13.0",  features = [ "derive" ] }
@@ -11,7 +20,8 @@ winit = "0.28.1"
 env_logger = "0.10"
 log = "0.4"
 wgpu = "0.15"
-pollster = "0.2.5"
+pollster = "0.3.0"
+async-executor = "1.5.0"
 
 [dependencies.image]
 version = "0.24.5"
