@@ -2,27 +2,12 @@
 name = "canvas"
 version = "0.1.0"
 edition = "2021"
-include = ["examples/"]
-
-[[bin]]
-name = "stencil_triangles"
-path = "src/examples/stencil_triangles/main.rs"
-
-[[bin]]
-name = "cube"
-path = "src/examples/cube/main.rs"
 
 [dependencies]
-bytemuck = { version = "1.13.0",  features = [ "derive" ] }
-thiserror = "1.0.38"
-anyhow = "1.0.68"
-winit = "0.28.1"
-env_logger = "0.10"
-log = "0.4"
-wgpu = "0.15"
+bytemuck = { version = "1.13.0", features = [ "derive" ] }
+env_logger = "0.10.0"
+log = "0.4.17"
 pollster = "0.3.0"
-async-executor = "1.5.0"
+wgpu = "0.15.1"
+winit = "0.28.1"
 
-[dependencies.image]
-version = "0.24.5"
-features = ["png", "jpeg"]
