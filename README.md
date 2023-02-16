@@ -3,8 +3,8 @@
 
 Wrapping some abstraction over [wgpu](https://wgpu.rs/).   
 The main goal is to simplify creating objects and rendering process.  
-The second goal is to set up a playground for little 2d game dev. Nothing special  
-just to make learning rust and cg more fun. (further maybe more)  
+The second goal is to set up a playground for little 2d game dev.
+Nothing special just to make learning rust and cg more fun. (further maybe more)  
   
 For now, it is just a copy of wgpu framework.
 
